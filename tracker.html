@@ -1,9 +1,9 @@
 
-CLEAN TRACKER <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Financial Tracker Pro</title>
+<title>AIBD Financial Tracker Pro</title>
 
 <style>
 :root {
@@ -115,6 +115,9 @@ button {
 
 <body>
 
+<a href="index.html" class="home-link">← Back to Start</a>
+
+
 <!-- HEADER -->
 <div style="
   display:flex;
@@ -148,6 +151,14 @@ button {
         Reset Data
       </button>
 
+      <button onclick="exportData()" class="btn gray">
+        Export Data
+      </button>
+
+      <button onclick="importData()" class="btn gray">
+        Import Data
+      </button>
+
   </div>
 </div>
 
@@ -179,6 +190,23 @@ button {
   .btn:hover {
     opacity: 0.9;
   }
+
+.home-link {
+  position:absolute;
+  top:20px;
+  left:20px;
+
+  font-size:13px;
+  color:#9fb0c6;
+  text-decoration:none;
+
+  z-index:999;
+}
+
+.home-link:hover {
+  color:white;
+}
+
 </style>
 
 <!-- MONTH -->
@@ -530,6 +558,63 @@ render();
 renderIncome();
 updateIncomeTotal();
 updateSurplus();
+
+
+/* ========================= */
+/* 🔥 BACKUP SYSTEM */
+/* ========================= */
+
+function exportData(){
+  const data = {
+    accounts: localStorage.getItem("accounts"),
+    monthlyData: localStorage.getItem("monthlyData"),
+    incomeData: localStorage.getItem("incomeData"),
+    dueValues: localStorage.getItem("dueValues"),
+    notes1: localStorage.getItem("n1"),
+    notes2: localStorage.getItem("n2")
+  };
+
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "financial-backup.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+
+function importData(){
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+
+    const reader = new FileReader();
+    reader.onload = function(event){
+      const data = JSON.parse(event.target.result);
+
+      if(data.accounts) localStorage.setItem("accounts", data.accounts);
+      if(data.monthlyData) localStorage.setItem("monthlyData", data.monthlyData);
+      if(data.incomeData) localStorage.setItem("incomeData", data.incomeData);
+      if(data.dueValues) localStorage.setItem("dueValues", data.dueValues);
+      if(data.notes1) localStorage.setItem("n1", data.notes1);
+      if(data.notes2) localStorage.setItem("n2", data.notes2);
+
+      alert("Data restored successfully!");
+
+      location.reload();
+    };
+
+    reader.readAsText(file);
+  };
+
+  input.click();
+}
 
 </script>
 
