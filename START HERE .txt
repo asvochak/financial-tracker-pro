@@ -1,0 +1,75 @@
+AIBD Financial Tracker Pro
+
+A simple system designed to help you take control of your money and get out of debt.
+--------------------------------------------------
+
+Take control of your money.
+Track every bill. Know exactly where your money goes.
+
+--------------------------------------------------
+
+HOW TO USE:
+
+1. Open "index.html" in your browser
+2. Click "Start Tracking My Money"
+3. Enter all of your accounts on the setup page
+4. Click "View Dashboard"
+5. Use the tracker each month:
+   - Enter what is due
+   - Enter what you paid
+   - Track your progress and your remaining money
+
+--------------------------------------------------
+
+HOW IT WORKS:
+
+• Setup Page → Define all of your accounts and categories  
+• Dashboard → Track real monthly payments and progress  
+
+This is not a spreadsheet.
+
+This is a system designed to help you:
+• Stop guessing  
+• Stay accountable  
+• Take control of your finances  
+
+--------------------------------------------------
+
+IMPORTANT NOTES:
+
+• Do NOT rename or move the files  
+• Your data is stored locally in your browser (nothing is uploaded)  
+• Works best in Chrome or Edge  
+• Your data stays completely private on your device  
+
+--------------------------------------------------
+
+TIP:
+
+Use this tracker every month.
+
+Consistency = Control  
+Control = Financial Progress  
+Financial Progress = Freedom  
+
+--------------------------------------------------
+
+MONTHLY SYSTEM (IMPORTANT):
+
+This is where change actually happens.
+
+Use this tracker once per month:
+
+1. Select the current month  
+2. Enter what each bill is due  
+3. Track what you actually paid  
+4. Review your remaining money  
+
+Most people never track consistently.
+
+If you do — your finances will improve.
+
+--------------------------------------------------
+
+© 2026 Andrew Svochak  
+AIBD Financial Tracker Pro • Version 1.0

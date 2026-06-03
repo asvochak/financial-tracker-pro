@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Financial Progress</title>
+
+<style>
+body {
+  background:#0f172a;
+  color:white;
+  font-family:Arial;
+
+  margin:0;
+  height:100vh;
+  overflow:hidden;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* CARD */
+.card {
+  max-width:500px;
+  width:100%;
+  padding:30px;
+  border-radius:14px;
+  background:#162033;
+  border:1px solid #273449;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+/* TITLE */
+h1 {
+  margin-bottom:10px;
+}
+
+/* MONTH LABEL */
+.month {
+  color:#9fb0c6;
+  font-size:14px;
+}
+
+/* SCORE */
+.score {
+  font-size:60px;
+  font-weight:bold;
+  color:#facc15;
+}
+
+/* GRADE */
+.grade {
+  font-size:26px;
+}
+
+/* PROGRESS BAR */
+.progress {
+  width:100%;
+  background:#273449;
+  border-radius:8px;
+  overflow:hidden;
+}
+
+.bar {
+  height:16px;
+  width:0%;
+  background:#22c55e;
+  transition:0.4s ease;
+}
+
+/* CASH */
+.cash {
+  font-size:18px;
+  font-weight:bold;
+}
+
+/* TEXT */
+p {
+  color:#9fb0c6;
+  font-size:14px;
+  text-align:left;
+  white-space:pre-line;
+}
+
+/* BUTTON */
+a {
+  margin-top:10px;
+  padding:10px 18px;
+  background:#3b82f6;
+  border-radius:8px;
+  color:white;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>Monthly Financial Progress</h1>
+
+<div id="monthLabel" class="month"></div>
+
+<div id="score" class="score">0</div>
+<div id="grade" class="grade">-</div>
+
+<div class="progress">
+  <div id="bar" class="bar"></div>
+</div>
+
+<div id="cashFlow" class="cash">$0.00</div>
+
+<p id="insight"></p>
+
+<a href="tracker.html">Back to Tracker</a>
+
+</div>
+
+<script>
+
+/* ✅ GET SELECTED MONTH FROM TRACKER */
+let currentMonth = parseInt(localStorage.getItem("selectedMonth"));
+
+if(isNaN(currentMonth)){
+  currentMonth = new Date().getMonth();
+}
+
+/* ✅ MONTH LABEL */
+const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+document.getElementById("monthLabel").innerText = "Viewing: " + months[currentMonth];
+
+/* DATA */
+let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+let monthlyData = JSON.parse(localStorage.getItem("monthlyData")) || {};
+let dueValues = JSON.parse(localStorage.getItem("dueValues")) || {};
+let incomeData = JSON.parse(localStorage.getItem("incomeData")) || [];
+
+/* INCOME */
+function getIncome(){
+  let total = 0;
+  incomeData.forEach(i=>{
+    total += i?.monthly?.[currentMonth] || 0;
+  });
+  return total;
+}
+
+/* LAST MONTH */
+function getLastMonthIncome(){
+  let prev = (currentMonth - 1 + 12) % 12;
+  let total = 0;
+
+  incomeData.forEach(i=>{
+    total += i?.monthly?.[prev] || 0;
+  });
+
+  return total;
+}
+
+/* EXPENSES */
+function getExpenses(){
+  let total = 0;
+
+  accounts.forEach((a,i)=>{
+    let val = monthlyData[i]?.[currentMonth] || 0;
+    if(a.section !== "savings"){
+      total += val;
+    }
+  });
+
+  return total;
+}
+
+/* SCORE */
+function calculateScore(){
+  let score = 100;
+  let allPaid = true;
+
+  accounts.forEach((a,i)=>{
+    let due = parseFloat(dueValues[i]?.[currentMonth]) || 0;
+    let paid = parseFloat(monthlyData[i]?.[currentMonth]) || 0;
+
+    if(due > 0){
+      if(paid === 0){
+        score -= 15;
+        allPaid = false;
+      }
+      else if(paid < due){
+        score -= 5;
+        allPaid = false;
+      }
+    }
+
+    if(paid > due){
+      score += 2;
+    }
+  });
+
+  let income = getIncome();
+  let expenses = getExpenses();
+  let surplus = income - expenses;
+
+  if(surplus > 0){
+    if(surplus > income * 0.20) score += 10;
+    else if(surplus > income * 0.10) score += 7;
+    else score += 5;
+  } else {
+    score -= 10;
+  }
+
+  let lastIncome = getLastMonthIncome();
+
+  if(income < lastIncome){
+    score -= 5;
+  } else if(income > lastIncome){
+    score += 5;
+  }
+
+  if(allPaid) score += 5;
+
+  return Math.max(Math.min(score,100),0);
+}
+
+/* BREAKDOWN */
+function getBreakdown(){
+  let missed = 0;
+  let partial = 0;
+
+  accounts.forEach((a,i)=>{
+    let due = dueValues[i]?.[currentMonth] || 0;
+    let paid = monthlyData[i]?.[currentMonth] || 0;
+
+    if(due > 0){
+      if(paid === 0) missed++;
+      else if(paid < due) partial++;
+    }
+  });
+
+  return `Missed Payments: ${missed}\nPartial Payments: ${partial}`;
+}
+
+/* GRADE */
+function getGrade(score){
+  if(score >= 90) return "A";
+  if(score >= 75) return "B";
+  if(score >= 60) return "C";
+  if(score >= 40) return "D";
+  return "F";
+}
+
+/* INSIGHT */
+function getInsight(score){
+  if(score >= 90) return "Excellent — You're in full control. Keep this up.";
+  if(score >= 75) return "Good — You're on track. Tighten a few areas.";
+  if(score >= 60) return "Warning — You're slipping. Stay consistent.";
+  if(score >= 40) return "Danger — You're falling behind. Take control now.";
+  return "Critical — Immediate action needed. Reset and refocus.";
+}
+
+/* SURPLUS MESSAGE */
+function getSurplusMessage(){
+  let income = getIncome();
+  let expenses = getExpenses();
+  let surplus = income - expenses;
+
+  if(surplus > income * 0.20){
+    return "Strong month — consider putting extra toward debt.";
+  }
+
+  if(surplus > 0){
+    return "Good — you stayed positive. Use extra money to reduce debt.";
+  }
+
+  if(surplus === 0){
+    return "Break-even — no progress this month. Look for small savings.";
+  }
+
+  return "Negative — expenses exceeded income. Reduce spending or increase income.";
+}
+
+/* INCOME MESSAGE */
+function getIncomeMessage(){
+  let income = getIncome();
+  let last = getLastMonthIncome();
+
+  if(income > last){
+    return "Income improved — keep it consistent.";
+  }
+
+  if(income < last){
+    return "Income dropped — look for ways to boost earnings.";
+  }
+
+  return "";
+}
+
+/* ACTION */
+function getAction(score){
+  if(score >= 75) return "Next Step: Stay consistent next month.";
+  if(score >= 50) return "Next Step: Focus on paying all minimums.";
+  return "Next Step: Prioritize essentials and recover immediately.";
+}
+
+/* DISPLAY */
+let score = calculateScore();
+let income = getIncome();
+let expenses = getExpenses();
+let surplus = income - expenses;
+
+document.getElementById("score").innerText = score + "/100";
+document.getElementById("grade").innerText = "Grade: " + getGrade(score);
+document.getElementById("bar").style.width = score + "%";
+
+let cashEl = document.getElementById("cashFlow");
+cashEl.innerText = "Cash Flow: $" + surplus.toFixed(2);
+cashEl.style.color = surplus >= 0 ? "#22c55e" : "#ef4444";
+
+document.getElementById("insight").innerText =
+  getInsight(score) + "\n\n" +
+  getSurplusMessage() + "\n\n" +
+  getIncomeMessage() + "\n\n" +
+  getBreakdown() + "\n\n" +
+  getAction(score);
+
+</script>
+
+</body>
+</html>

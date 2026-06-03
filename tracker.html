@@ -1,0 +1,537 @@
+
+CLEAN TRACKER <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Financial Tracker Pro</title>
+
+<style>
+:root {
+  --bg:#101827;
+  --card:#162033;
+  --border:#273449;
+  --text:#e6eef8;
+  --muted:#9fb0c6;
+  --accent:#3b82f6;
+}
+
+body {
+  font-family: system-ui, Arial;
+  background:#0f172a;
+  color:var(--text);
+  padding:20px;
+}
+
+body {
+  position:relative;
+}
+
+
+.table {
+  background:var(--card);
+  border-radius:12px;
+  padding:16px;
+  border:1px solid var(--border);
+}
+
+h3 { color:var(--accent); }
+
+table {
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 8px;
+}
+
+th { color:var(--accent); }
+
+.row-box {
+  background:#0f1a2b;
+  box-shadow:0 2px 6px rgba(0,0,0,0.25);
+}
+
+td { padding:8px 6px; }
+
+input {
+  height:28px;
+  border-radius:6px;
+  border:1px solid var(--border);
+  background:#0f172a;
+  color:white;
+}
+
+.month-input { width:70px !important; }
+.due-input { width:70px; }
+
+/* currency */
+.currency-input {
+  position: relative;
+  display:flex;
+  align-items:center;
+}
+
+.currency-input span {
+  position:absolute;
+  left:6px;
+  color:var(--muted);
+}
+
+.currency-input input {
+  padding-left:16px;
+  text-align:right;
+}
+
+.red { background:#7f1d1d !important; }
+.yellow { background:#854d0e !important; }
+.green { background:#166534 !important; }
+
+.status-cell {
+  font-weight:bold;
+  text-align:center;
+}
+
+.total-row {
+  font-weight:bold;
+  color:#22c55e;
+}
+
+textarea {
+  width:100%;
+  height:260px;
+  background:#0f172a;
+  color:white;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+}
+
+button {
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div style="
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  position:relative;
+  z-index:5;
+">
+  <h1>Financial Tracker Pro</h1>
+
+  <div style="display:flex; gap:10px;">
+    
+    <!-- EDIT INCOME -->
+    <button id="editBtn" onclick="toggleEditMode()" class="btn blue">
+      Edit Income
+    </button>
+
+    <!-- SETUP PAGE -->
+      <button onclick="location.href='progress.html'" class="btn purple">
+    Back to Progress
+      </button>
+
+    <!-- SETUP PAGE -->
+      <button onclick="location.href='setup.html'" class="btn gray">
+    Back to Setup
+      </button>
+
+      <!--  RESET DATA -->
+      <button onclick="resetAll()" class="btn red">
+        Reset Data
+      </button>
+
+  </div>
+</div>
+
+<!-- STYLES -->
+<style>
+  .btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 140px;
+    text-align: center;
+  }
+
+.btn {
+  display:inline-block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  z-index:10;
+}
+
+  .blue { background: #2563eb; }
+  .gray { background: #374151; }
+  .red { background: #ef4444; }
+  .purple { background: #dda0dd; }
+
+  .btn:hover {
+    opacity: 0.9;
+  }
+</style>
+
+<!-- MONTH -->
+<div style="margin-bottom:15px; display:flex; gap:20px; align-items:center;">
+<label>Month:</label>
+
+<select id="monthSelect" onchange="setMonth(this.value)">
+<option value="0">Jan</option>
+<option value="1">Feb</option>
+<option value="2">Mar</option>
+<option value="3">Apr</option>
+<option value="4">May</option>
+<option value="5">Jun</option>
+<option value="6">Jul</option>
+<option value="7">Aug</option>
+<option value="8">Sep</option>
+<option value="9">Oct</option>
+<option value="10">Nov</option>
+<option value="11">Dec</option>
+</select>
+
+<div>
+<strong>Surplus:</strong>
+<span id="surplusDisplay">$0.00</span>
+</div>
+</div>
+
+<!-- TABLE -->
+<div class="table">
+<table>
+<thead>
+<tr>
+<th>Account</th>
+<th>Due</th>
+<th>Status</th>
+<th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th>
+<th>May</th><th>Jun</th><th>Jul</th><th>Aug</th>
+<th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+<tfoot id="totalsRow"></tfoot>
+</table>
+</div>
+
+<!-- BOTTOM -->
+<div style="display:flex; gap:20px; margin-top:30px;">
+
+<!-- INCOME -->
+<div class="table" style="max-width:250px;">
+<h3>Income</h3>
+<div id="incomeSection"></div>
+
+<div style="display:flex; justify-content:space-between; margin-top:8px;">
+  <div class="total-row">Total</div>
+  <div class="total-row" id="incomeTotal">$0.00</div>
+</div>
+</div>
+
+<!-- NOTES -->
+<div class="table" style="flex:1;">
+<h3>Notes</h3>
+
+<div style="display:flex; gap:20px;">
+<div style="flex:1;">
+<textarea id="n1"></textarea>
+<button onclick="clearNotes1()" style="background:#374151;color:white;margin-top:6px;">Clear</button>
+</div>
+
+<div style="flex:1;">
+<textarea id="n2"></textarea>
+<button onclick="clearNotes2()" style="background:#374151;color:white;margin-top:6px;">Clear</button>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+let currentMonth = new Date().getMonth();
+let editMode = false;
+
+let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+let monthlyData = JSON.parse(localStorage.getItem("monthlyData")) || {};
+let incomeData = JSON.parse(localStorage.getItem("incomeData")) || [];
+let dueValues = JSON.parse(localStorage.getItem("dueValues")) || {};
+
+/* EDIT MODE */
+function toggleEditMode(){
+  editMode = !editMode;
+  let btn = document.getElementById("editBtn");
+  btn.style.background = editMode ? "#f59e0b" : "#2563eb";
+  renderIncome();
+}
+
+/* RESET */
+function resetAll(){
+  if(confirm("Reset all data?")){
+    localStorage.clear();
+    location.href="setup.html";
+  }
+}
+
+/* MONEY */
+function formatMoney(n){
+  return n.toLocaleString("en-US",{style:"currency",currency:"USD"});
+}
+
+/* INCOME TOTAL */
+function getIncomeTotal(){
+  let t=0;
+  incomeData.forEach(i=>{
+    t+=i?.monthly?.[currentMonth] || 0;
+  });
+  return t;
+}
+
+/* EXPENSES */
+function getExpenses(){
+  let t=0;
+  accounts.forEach((a,i)=> t+=monthlyData[i]?.[currentMonth]||0);
+  return t;
+}
+
+function updateSurplus(){
+  let val=getIncomeTotal()-getExpenses();
+  let el=document.getElementById("surplusDisplay");
+
+  el.textContent=formatMoney(val);
+  el.style.color = val>=0 ? "#22c55e" : "#ef4444";
+}
+
+/* ✅ FIXED saveDue (only ONE version now) */
+function saveDue(i, val){
+  if(!dueValues[i]) dueValues[i] = {};
+
+  dueValues[i][currentMonth] = Math.max(0, parseFloat(val) || 0);
+
+  localStorage.setItem("dueValues", JSON.stringify(dueValues));
+
+  updateStatus(i);
+  updateSurplus();
+}
+
+const sectionNames = {
+  housing: "Housing & Utilities",
+  expenses: "Monthly Expenses",
+  debt: "Debt",
+  transport: "Transportation",
+  insurance: "Insurance",
+  savings: "Savings & Investments",
+  misc: "Miscellaneous"
+};
+
+
+/* CATEGORY GROUPING */
+function render(){
+  let body=document.getElementById("tableBody");
+  body.innerHTML="";
+  let totals=Array(12).fill(0);
+
+  let grouped={};
+  accounts.forEach((acc,i)=>{
+    if(!grouped[acc.section]) grouped[acc.section]=[];
+    grouped[acc.section].push({acc,i});
+  });
+
+  Object.keys(grouped).forEach(section=>{
+body.innerHTML+=`<tr>
+  <td colspan="16" style="
+    color:#60a5fa;
+    font-weight:bold;
+    padding-top:12px;
+    font-size:13px;
+    letter-spacing:1px;
+    border-bottom:1px solid #273449;
+  ">
+    ${sectionNames[section] || section}
+  </td>
+</tr>`;
+
+    grouped[section].forEach(({acc,i})=>{
+      let total=0;
+
+      let row=`<tr class="row-box">
+      <td>${acc.name}</td>
+
+      <td>
+        <div class="currency-input">
+          <span>$</span>
+          <input class="due-input"
+          value="${dueValues[i]?.[currentMonth] || ""}"
+          oninput="saveDue(${i},this.value)"
+          onblur="this.value = parseFloat(this.value || 0).toFixed(2)">
+        </div>
+      </td>
+
+      <td data-status="${i}" class="status-cell"></td>`;
+
+      for(let m=0;m<12;m++){
+        let val=monthlyData[i]?.[m]||"";
+        let num=parseFloat(val)||0;
+
+        total+=num;
+        totals[m]+=num;
+
+        let highlight = m === currentMonth ? 'style="outline:2px solid #3b82f6;"' : "";
+
+        row+=`<td ${highlight}>
+          <div class="currency-input">
+            <span>$</span>
+            <input class="month-input"
+            value="${val}"
+            oninput="saveValue(${i},${m},this.value)"
+            onblur="this.value = parseFloat(this.value || 0).toFixed(2)">
+          </div>
+        </td>`;
+      }
+
+      row+=`<td>${formatMoney(total)}</td></tr>`;
+      body.innerHTML+=row;
+
+      updateStatus(i);
+    });
+  });
+
+  renderTotals(totals);
+  updateSurplus();
+}
+
+/* SAVE */
+function saveValue(i,m,val){
+  if(!monthlyData[i]) monthlyData[i]={};
+  monthlyData[i][m]=Math.max(0, parseFloat(val)||0);
+
+  localStorage.setItem("monthlyData",JSON.stringify(monthlyData));
+
+  updateStatus(i);  // ✅ FIXED
+  updateSurplus();
+}
+
+/* STATUS */
+function updateStatus(i){
+  let cell = document.querySelector(`[data-status='${i}']`);
+
+  let due = parseFloat(dueValues[i]?.[currentMonth]) || 0;
+  let paid = parseFloat(monthlyData[i]?.[currentMonth]) || 0;
+
+  cell.classList.remove("red","yellow","green");
+
+  if(due === 0){
+    cell.textContent = "-";
+  }
+  else if(paid === 0){
+    cell.textContent="NOT PAID";
+    cell.classList.add("red");
+  }
+  else if(paid < due){
+    cell.textContent="PARTIAL";
+    cell.classList.add("yellow");
+  }
+  else{
+    cell.textContent="PAID";
+    cell.classList.add("green");
+  }
+}
+
+/* TOTALS */
+function renderTotals(t){
+  let grand=t.reduce((a,b)=>a+b,0);
+  let row=`<tr class="total-row"><td>Total</td><td></td><td></td>`;
+  t.forEach(v=>row+=`<td>${formatMoney(v)}</td>`);
+  row+=`<td>${formatMoney(grand)}</td></tr>`;
+  totalsRow.innerHTML=row;
+}
+
+/* NOTES */
+n1.value = localStorage.getItem("n1") || "";
+n2.value = localStorage.getItem("n2") || "";
+
+n1.oninput=()=>localStorage.setItem("n1",n1.value);
+n2.oninput=()=>localStorage.setItem("n2",n2.value);
+
+function clearNotes1(){ n1.value=""; localStorage.removeItem("n1"); }
+function clearNotes2(){ n2.value=""; localStorage.removeItem("n2"); }
+
+/* INCOME */
+function renderIncome(){
+  let html="";
+
+  ["Job","Side","Other1","Other2"].forEach((l,i)=>{
+    let d=incomeData[i]||{name:l,monthly:{}};
+
+    let nameField = editMode
+      ? `<input style="width:120px" value="${d.name||l}"
+          oninput="
+            if(!incomeData[${i}]) incomeData[${i}]={name:'',monthly:{}};
+            incomeData[${i}].name=this.value;
+            localStorage.setItem('incomeData',JSON.stringify(incomeData));
+          ">`
+      : `<div style="width:120px;color:#9fb0c6;padding-left:4px;">
+          ${d.name||l}
+        </div>`;
+
+    html+=`
+    <div style="display:flex; justify-content:space-between; margin:6px 0;">
+      ${nameField}
+      <div class="currency-input">
+        <span>$</span>
+        <input style="width:70px"
+        value="${d.monthly?.[currentMonth]||""}"
+        oninput="
+          if(!incomeData[${i}]) incomeData[${i}]={name:'',monthly:{}};
+          if(!incomeData[${i}].monthly) incomeData[${i}].monthly={};
+          incomeData[${i}].monthly[${currentMonth}]=Math.max(0, parseFloat(this.value)||0);
+          localStorage.setItem('incomeData',JSON.stringify(incomeData));
+          updateIncomeTotal();updateSurplus();
+        "
+        onblur="this.value = parseFloat(this.value || 0).toFixed(2)">
+      </div>
+    </div>`;
+  });
+
+  incomeSection.innerHTML=html;
+}
+
+function updateIncomeTotal(){
+  incomeTotal.textContent=formatMoney(getIncomeTotal());
+}
+
+/* MONTH */
+function setMonth(m){
+  currentMonth = parseInt(m);
+
+  localStorage.setItem("selectedMonth", m);
+
+  render();
+  renderIncome();
+  updateIncomeTotal();
+  updateSurplus();
+}
+
+/* INIT */
+document.getElementById("monthSelect").value=currentMonth;
+localStorage.setItem("selectedMonth", currentMonth);
+
+render();
+renderIncome();
+updateIncomeTotal();
+updateSurplus();
+
+</script>
+
+</body>
+</html>

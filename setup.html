@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Financial Dashboard Setup</title>
+
+<style>
+:root {
+  --bg:#101827;
+  --card:#162033;
+  --border:#273449;
+  --text:#e6eef8;
+  --muted:#9fb0c6;
+  --accent:#3b82f6;
+}
+
+body {
+  font-family: Arial;
+  color: var(--text);
+  padding: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(59,130,246,0.08), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(23,209,255,0.05), transparent 40%),
+    linear-gradient(180deg, #111827, #0b1220);
+}
+
+.container {
+  display:flex;
+  flex-wrap:wrap;
+  gap:24px;
+}
+
+.section {
+  background:var(--card);
+  border-radius:14px;
+  padding:12px 12px 6px 12px;
+  width:320px;
+  border:2px solid var(--border);
+
+  display:flex;
+  flex-direction:column;   
+}
+
+.section div[id] {
+  flex-grow:1;   
+}
+
+
+.section h3 { color:var(--accent); }
+
+.row {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin:2px 0;
+}
+
+input {
+  background:#111c2f;
+  border:1px solid #2a3a55;
+  color:white;
+  padding:4px 1px;
+  font-size:13px;
+  border-radius:6px;
+  height:30px;
+}
+
+.label { flex:1; }
+.amount { width:70px; }
+
+
+.total {
+  margin-top:10px;
+  font-weight:bold;
+  color:var(--accent);
+}
+
+/* ✅ ADD BUTTON */
+.add-small {
+  display:inline-block;
+  width:60px;
+  margin:6px auto 4px auto;
+  padding:5px 10px;
+  font-size:12px;
+  background:#16a34a;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  transition:0.15s ease;  
+}
+
+
+
+.add-small:hover {
+  background:#15803d;   
+}
+
+
+button {
+  display:block;
+  margin:40px auto;
+  padding:14px;
+  width:320px;
+  background:#3b82f6;
+  color:black;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.delete-btn {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:4px 10px;
+  background:#ef4444;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:12px;
+  height:28px;
+  white-space:nowrap;
+}
+
+.delete-btn:hover {
+  background:#dc2626;
+}
+
+/* remove arrows */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* currency wrapper */
+.currency {
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+
+.currency span {
+  position:absolute;
+  left:8px;
+  color:#9fb0c6;
+  font-size:12px;
+}
+
+/* adjust input */
+.currency input {
+  padding-left:16px;
+  text-align:right;
+  
+}
+
+.row:hover {
+  background:rgba(59,130,246,0.05);
+  border-radius:6px;
+}
+
+</style>
+</head>
+
+<body>
+
+
+<div style="display:flex; align-items:center; gap:20px; margin-bottom:10px;">
+  
+  <h1 style="margin:0;">AIBD Financial Dashboard Input Page:   </h1>
+
+  <input id="customerName"
+         placeholder="Your Name / Family"
+         style="
+           width:300px;
+           padding:10px 12px;
+           border-radius:10px;
+           border:1px solid #273449;
+           background:#111c2f;
+           color:yellow;
+           text-align:left;
+           font-size:20px;
+           font-weight:400;
+         ">
+</div>
+
+</div>
+
+
+<div class="instructions">
+  <strong>STEP 1:</strong> Enter accounts you use<br><br>
+  <strong>STEP 2:</strong> Use the "+Add" button to add as many accounts as you need <br><br>
+  <strong>STEP 3:</strong> Click "View Dashboard"<br><br>
+</div>
+
+<div class="container">
+
+<!-- HOUSING -->
+<div class="section">
+<h3>FIXED – HOUSING & UTILITIES</h3>
+<div id="housing"></div>
+<button class="add-small" onclick="addCustomRow('housing','housing')">+ Add</button>
+<div class="total" id="housingTotal">$0</div>
+</div>
+
+<!-- EXPENSES -->
+<div class="section">
+<h3>VARIABLE – MONTHLY EXPENSES</h3>
+<div id="expenses"></div>
+<button class="add-small" onclick="addCustomRow('expenses','expenses')">+ Add</button>
+<div class="total" id="expensesTotal">$0</div>
+</div>
+
+<!-- DEBT -->
+<div class="section">
+<h3>DEBT</h3>
+
+<b>Credit Cards</b>
+<div id="creditCards"></div>
+<button class="add-small" onclick="addCustomRow('creditCards','debt')">+ Add</button>
+
+<b>Personal Loans</b>
+<div id="personalLoans"></div>
+<button class="add-small" onclick="addCustomRow('personalLoans','debt')">+ Add</button>
+
+<div class="total" id="debtTotal">$0</div>
+</div>
+
+<!-- SAVINGS -->
+<div class="section">
+<h3>SAVINGS & INVESTMENTS</h3>
+
+<b>Emergency Funds</b>
+<div id="emergency"></div>
+<button class="add-small" onclick="addCustomRow('emergency','savings')">+ Add</button>
+
+<b>Savings Accounts</b>
+<div id="savings"></div>
+<button class="add-small" onclick="addCustomRow('savings','savings')">+ Add</button>
+
+<b>Retirement</b>
+<div id="retirement"></div>
+<button class="add-small" onclick="addCustomRow('retirement','savings')">+ Add</button>
+
+<b>Investments</b>
+<div id="investments"></div>
+<button class="add-small" onclick="addCustomRow('investments','savings')">+ Add</button>
+
+<div class="total" id="savingsTotal">$0</div>
+</div>
+
+<!-- TRANSPORT -->
+<div class="section">
+<h3>TRANSPORTATION</h3>
+<div id="transport"></div>
+<button class="add-small" onclick="addCustomRow('transport','transport')">+ Add</button>
+<div class="total" id="transportTotal">$0</div>
+</div>
+
+<!-- INSURANCE -->
+<div class="section">
+<h3>INSURANCE</h3>
+
+<div id="insurance"></div>
+<button class="add-small" onclick="addCustomRow('insurance','insurance')">+ Add</button>
+
+<b>Other Policies</b>
+<div id="otherPolicies"></div>
+<button class="add-small" onclick="addCustomRow('otherPolicies','insurance')">+ Add</button>
+
+<div class="total" id="insuranceTotal">$0</div>
+</div>
+
+<!-- MISC -->
+<div class="section">
+<h3>MISCELLANEOUS</h3>
+<div id="misc"></div>
+<button class="add-small" onclick="addCustomRow('misc','misc')">+ Add</button>
+<div class="total" id="miscTotal">$0</div>
+</div>
+
+</div>
+
+<button onclick="saveAll()">VIEW MY FINANCIAL DASHBOARD</button>
+
+<script>
+
+/* ✅ CREATE ROW */
+function makeRow(label, section) {
+  return `
+    <div class="row" data-section="${section}">
+      
+      <input class="label" placeholder="${label}">
+
+      <div class="currency">
+        <span>$</span>
+        <input class="amount" type="number" step="0.01"
+          oninput="updateTotals()"
+          onblur="this.value = parseFloat(this.value || 0).toFixed(2)">
+      </div>
+
+      <button onclick="deleteRow(this)" class="delete-btn">Delete</button>
+
+    </div>
+  `;
+}
+
+
+/* ✅ ADD CUSTOM ROW */
+function addCustomRow(containerId, section) {
+  const container = document.getElementById(containerId);
+  const div = document.createElement("div");
+  div.innerHTML = makeRow("Custom Item", section);
+  container.appendChild(div.firstElementChild);
+}
+
+/* ✅ DEFAULT DATA */
+function addRows(id, labels, section) {
+  const container = document.getElementById(id);
+  labels.forEach(l => {
+    container.innerHTML += makeRow(l, section);
+  });
+}
+
+/* ✅ INITIAL DATA */
+
+function loadSavedAccounts(){
+  const saved = JSON.parse(localStorage.getItem("accounts"));
+
+  // ✅ ALWAYS load default guide rows first
+  loadDefaults();
+
+  if(!saved) return;
+
+  // ✅ THEN ADD saved data on top
+
+  // clear all sections
+
+
+  // rebuild rows from saved data
+  saved.forEach(acc=>{
+    const row = document.createElement("div");
+    row.className = "row";
+    row.dataset.section = acc.section;
+
+    row.innerHTML = `
+      <input class="label"
+       value="${acc.name}"
+       placeholder="${acc.placeholder || acc.name}">
+
+
+      <div class="currency">
+        <span>$</span>
+        <input class="amount" type="number" value="${acc.balance}" step="0.01"
+          oninput="updateTotals()"
+          onblur="this.value = parseFloat(this.value || 0).toFixed(2)">
+      </div>
+
+      <button onclick="deleteRow(this)" class="delete-btn">Delete</button>
+    `;
+
+    const container = findContainer(acc.section);
+    if(container) container.appendChild(row);
+  });
+
+  updateTotals();
+}
+
+
+/* ✅ TOTALS */
+function updateTotals(){
+  let totals = {housing:0,expenses:0,debt:0,transport:0,insurance:0,savings:0,misc:0};
+
+  document.querySelectorAll(".row").forEach(row=>{
+    let val = parseFloat(row.querySelector(".amount").value);
+    let sec = row.dataset.section;
+    if(!isNaN(val)) totals[sec]+=val;
+  });
+
+  Object.keys(totals).forEach(k=>{
+    let el=document.getElementById(k+"Total");
+    if(el) el.innerText="$"+totals[k].toFixed(2);
+  });
+}
+
+/* ✅ SAVE */
+function saveAll(){
+  let accounts=[];
+  document.querySelectorAll(".row").forEach(row=>{
+    let name=row.children[0].value;
+    let val = parseFloat(row.querySelector(".amount").value);
+
+    if(name){
+      accounts.push({
+     name,
+     balance: val||0,
+     section: row.dataset.section,
+     placeholder: row.children[0].placeholder   // 🔥 THIS IS THE KEY
+   });
+    }
+  });
+
+  localStorage.setItem("accounts",JSON.stringify(accounts));
+  location.href="tracker.html";
+}
+
+// LOAD SAVED NAME
+document.getElementById("customerName").value =
+  localStorage.getItem("customerName") || "";
+
+// SAVE ON TYPE
+document.getElementById("customerName").addEventListener("input", function() {
+  localStorage.setItem("customerName", this.value);
+});
+
+function deleteRow(btn){
+  btn.parentElement.remove();
+  updateTotals();
+}
+
+function findContainer(section){
+  const map = {
+    housing: "housing",
+    expenses: "expenses",
+    debt: "creditCards",
+    transport: "transport",
+    insurance: "insurance",
+    savings: "savings",
+    misc: "misc"
+  };
+
+  return document.getElementById(map[section]);
+}
+
+function loadDefaults(){
+  addRows("housing", [
+   "Mortgage / Rent","Property Taxes","Electricity","Water","Internet"
+  ],"housing");
+
+  addRows("expenses", [
+   "Groceries","Phone","Subscriptions","Dining"
+  ],"expenses");
+
+  addRows("creditCards",
+   Array.from({length:3},(_,i)=>`Credit Card ${i+1}`),
+  "debt");
+
+  addRows("personalLoans",
+   Array.from({length:2},(_,i)=>`Loan ${i+1}`),
+  "debt");
+
+  addRows("transport", [
+   "Car Payment","Gas","Maintenance"
+  ],"transport");
+
+  addRows("insurance", [
+   "Health Insurance","Life Insurance"
+  ],"insurance");
+
+  addRows("otherPolicies", [
+   "Other Policy"
+  ],"insurance");
+
+  addRows("emergency", ["Emergency Fund"],"savings");
+  addRows("savings", ["Savings Account"],"savings");
+  addRows("retirement", ["Retirement"],"savings");
+  addRows("investments", ["Investment"],"savings");
+
+  addRows("misc", ["Other #1","Other #2"],"misc");
+}
+
+loadSavedAccounts();
+
+</script>
+
+</body>
+</html>
